@@ -8,7 +8,7 @@ namespace Assistant.Security {
 	internal static class Crypto {
 		private static readonly Logger Logger = new Logger(nameof(Crypto));
 
-		public static string Encrypt(string data) {
+		internal static string Encrypt(string data) {
 			if (string.IsNullOrEmpty(data) || string.IsNullOrWhiteSpace(data)) {
 				return string.Empty;
 			}
