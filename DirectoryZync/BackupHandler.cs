@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace DirectoryZync {
 	internal sealed class BackupHandler {
@@ -25,20 +24,20 @@ namespace DirectoryZync {
 		}
 
 		private bool CreateTargetWithInit() {
-
+			
 		}
 
 		private IEnumerable<string> GetFiles(string directory) {
-			if(string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) {
+			if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) {
 				yield return "";
 			}
 
-			string[] files = Directory.GetFiles(directory, "*" ,new EnumerationOptions() {
+			string[] files = Directory.GetFiles(directory, "*", new EnumerationOptions() {
 				ReturnSpecialDirectories = false
 			});
 
-			for(int i = 0; i < files.Length; i++) {
-				if(string.IsNullOrEmpty(files[i]) || !File.Exists(files[i])) {
+			for (int i = 0; i < files.Length; i++) {
+				if (string.IsNullOrEmpty(files[i]) || !File.Exists(files[i])) {
 					continue;
 				}
 
@@ -59,7 +58,7 @@ namespace DirectoryZync {
 				ReturnSpecialDirectories = false
 			});
 
-			for(int i = 0; i < subDirs.Length; i++) {
+			for (int i = 0; i < subDirs.Length; i++) {
 				if (string.IsNullOrEmpty(subDirs[i]) || !Directory.Exists(subDirs[i])) {
 					continue;
 				}

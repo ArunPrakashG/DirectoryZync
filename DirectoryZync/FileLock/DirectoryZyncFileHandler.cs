@@ -7,35 +7,38 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DirectoryZync {
+namespace DirectoryZync.FileLock {
 	internal class DirectoryZyncFileHandler {
-		private readonly Logger Logger = new Logger(nameof(DirectoryZyncFileHandler));
-		private readonly BackupHandler BackupHandler;
+		private readonly Logger Logger;
 
-		internal DirectoryZyncFileHandler(BackupHandler _handler) {
-			BackupHandler = _handler;
+		internal DirectoryZyncFileHandler(Logger _logger) {
+			Logger = _logger;
 		}
 
 		internal static string GetZyncLockFileFor(string dir) => Path.Combine(dir, Constants.LOCK_FILE);
 
-		private async Task<bool> CreateZyncFilesAsync(DirectoryZyncFile defaultZyncConfig = null) {
-			if(!Directory.Exists(BackupHandler.SourceDirectory) || File.Exists(GetZyncLockFileFor(BackupHandler.SourceDirectory))){
+		internal async Task<bool> CreateZyncFilesAsync(string _sourceDir, string _targetDir, DirectoryZyncFile defaultZyncConfig = null) {
+			if(string.IsNullOrEmpty(_sourceDir) || string.IsNullOrEmpty(_targetDir)) {
+				return false;
+			}
+
+			if(!Directory.Exists(_sourceDir)){
 				return false;
 			}
 
 			DirectoryZyncFile defaultZyncFile = defaultZyncConfig != null ? defaultZyncConfig : new DirectoryZyncFile(DateTime.MinValue, false);
-			await WriteZyncFileAsync(defaultZyncFile, BackupHandler.SourceDirectory).ConfigureAwait(false);
-			await WriteZyncFileAsync(defaultZyncFile, BackupHandler.TargetDirectory).ConfigureAwait(false);
+			await WriteZyncFileAsync(defaultZyncFile, _sourceDir).ConfigureAwait(false);
+			await WriteZyncFileAsync(defaultZyncFile, _targetDir).ConfigureAwait(false);
 
-			return File.Exists(GetZyncLockFileFor(BackupHandler.SourceDirectory)) && File.Exists(GetZyncLockFileFor(BackupHandler.TargetDirectory));
+			return File.Exists(GetZyncLockFileFor(_sourceDir)) && File.Exists(GetZyncLockFileFor(_targetDir));
 		}
 
-		private async Task<bool> WriteZyncFileAsync(DirectoryZyncFile zyncConfig, string dirPath) {
-			if(zyncConfig == null || string.IsNullOrEmpty(dirPath)) {
+		internal async Task<bool> WriteZyncFileAsync(DirectoryZyncFile zyncConfig, string dirPath = null, Stream _stream = null) {
+			if(zyncConfig == null || (string.IsNullOrEmpty(dirPath) && _stream == null)) {
 				return false;
 			}
 
-			using (StreamWriter writer = new StreamWriter(File.Create(GetZyncLockFileFor(dirPath)), Encoding.ASCII)) {
+			using (StreamWriter writer = new StreamWriter(_stream ?? File.Create(GetZyncLockFileFor(dirPath)), Encoding.ASCII, 1024, leaveOpen: _stream != null ? true : false)) {
 				string json = GenerateEncryptedZyncFileJson(zyncConfig);
 
 				if (string.IsNullOrEmpty(json)) {
