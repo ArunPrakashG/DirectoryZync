@@ -1,3 +1,4 @@
+using DirectoryZync.FileLock;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ namespace DirectoryZync {
 		private bool IsBackupPossible => Directory.Exists(SourceDirectory);
 
 		private bool InitSourceDirectory() {
-
+			
 		}
 
 		private bool CreateTargetWithInit() {

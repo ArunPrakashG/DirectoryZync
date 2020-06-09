@@ -9,11 +9,6 @@ using System.Threading.Tasks;
 
 namespace DirectoryZync.FileLock {
 	internal class DirectoryZyncFileHandler {
-		private readonly Logger Logger;
-
-		internal DirectoryZyncFileHandler(Logger _logger) {
-			Logger = _logger;
-		}
 
 		internal static string GetZyncLockFileFor(string dir) => Path.Combine(dir, Constants.LOCK_FILE);
 
