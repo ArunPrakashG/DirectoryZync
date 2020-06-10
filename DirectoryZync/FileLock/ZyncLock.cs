@@ -15,9 +15,9 @@ namespace DirectoryZync.FileLock {
 		private FileStream ZyncStream;
 		private CancellationTokenSource ZyncToken;
 
-		internal ZyncLock(string _zyncDirPath) {
+		internal ZyncLock(string _zyncDirPath, DirectoryZyncFileHandler directoryZyncFileHandler = null) {
 			ZyncDirectoryPath = _zyncDirPath ?? throw new ArgumentNullException(nameof(_zyncDirPath));			
-			Handler = new DirectoryZyncFileHandler();
+			Handler = directoryZyncFileHandler ?? new DirectoryZyncFileHandler();
 			IsInitSuccess = Handler.WriteZyncFileAsync(new DirectoryZyncFile(DateTime.Now, false), ZyncDirectoryPath).Result;
 		}
 

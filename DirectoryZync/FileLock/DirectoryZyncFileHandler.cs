@@ -2,7 +2,6 @@ using Assistant.Security;
 using DirectoryZync.Models;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,15 +12,19 @@ namespace DirectoryZync.FileLock {
 		internal static string GetZyncLockFileFor(string dir) => Path.Combine(dir, Constants.LOCK_FILE);
 
 		internal async Task<bool> CreateZyncFilesAsync(string _sourceDir, string _targetDir, DirectoryZyncFile defaultZyncConfig = null) {
-			if(string.IsNullOrEmpty(_sourceDir) || string.IsNullOrEmpty(_targetDir)) {
+			if (string.IsNullOrEmpty(_sourceDir) || string.IsNullOrEmpty(_targetDir)) {
 				return false;
 			}
 
-			if(!Directory.Exists(_sourceDir)){
+			if (!Directory.Exists(_sourceDir)) {
 				return false;
 			}
 
-			DirectoryZyncFile defaultZyncFile = defaultZyncConfig != null ? defaultZyncConfig : new DirectoryZyncFile(DateTime.MinValue, false);
+			if (!Directory.Exists(_targetDir)) {
+				Directory.CreateDirectory(_targetDir);
+			}
+
+			DirectoryZyncFile defaultZyncFile = defaultZyncConfig ?? new DirectoryZyncFile(DateTime.MinValue, false);
 			await WriteZyncFileAsync(defaultZyncFile, _sourceDir).ConfigureAwait(false);
 			await WriteZyncFileAsync(defaultZyncFile, _targetDir).ConfigureAwait(false);
 
@@ -29,7 +32,7 @@ namespace DirectoryZync.FileLock {
 		}
 
 		internal async Task<bool> WriteZyncFileAsync(DirectoryZyncFile zyncConfig, string dirPath = null, Stream _stream = null) {
-			if(zyncConfig == null || (string.IsNullOrEmpty(dirPath) && _stream == null)) {
+			if (zyncConfig == null || (string.IsNullOrEmpty(dirPath) && _stream == null) || (!string.IsNullOrEmpty(dirPath) && !Directory.Exists(dirPath))) {
 				return false;
 			}
 
@@ -48,7 +51,7 @@ namespace DirectoryZync.FileLock {
 		}
 
 		private string GenerateEncryptedZyncFileJson(DirectoryZyncFile zyncConfig) {
-			if(zyncConfig == null) {
+			if (zyncConfig == null) {
 				return null;
 			}
 
@@ -56,11 +59,11 @@ namespace DirectoryZync.FileLock {
 		}
 
 		private async Task<DirectoryZyncFile> GetDecryptedZyncFileForDirectory(string dir) {
-			if(string.IsNullOrEmpty(dir) || !Directory.Exists(dir) || !File.Exists(GetZyncLockFileFor(dir))) {
+			if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir) || !File.Exists(GetZyncLockFileFor(dir))) {
 				return default;
 			}
 
-			using(StreamReader reader = new StreamReader(GetZyncLockFileFor(dir))) {
+			using (StreamReader reader = new StreamReader(GetZyncLockFileFor(dir))) {
 				string encryptedJson = await reader.ReadToEndAsync().ConfigureAwait(false);
 
 				if (string.IsNullOrEmpty(encryptedJson)) {
